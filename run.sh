@@ -33,4 +33,6 @@ fi
 unset IFS
 set +f
 
+p910nd -f $JETDIRECT_DEVICE
+
 node ./server/server.js

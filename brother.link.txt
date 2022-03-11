@@ -1,0 +1,3 @@
+https://download.brother.com/welcome/dlf006893/linux-brprinter-installer-2.2.3-1.gz
+https://download.brother.com/welcome/dlf006654/brother-udev-rule-type1-1.0.2-0.all.deb
+https://download.brother.com/welcome/dlf006633/brscan-0.2.4-0.amd64.deb

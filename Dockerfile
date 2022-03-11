@@ -106,3 +106,32 @@ RUN apt-get install -yq libsane-hpaio \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* \
   && echo hpaio >> /etc/sane.d/dll.conf
+
+
+# Brother MFC-8820-D image
+#
+# This image adds the Brother MFC-8820D drivers to the image. This target is not built by
+# default - you will need to specifically target it.
+# ==============================================================================
+FROM scanservjs-core AS scanservjs-brother
+COPY brscan-0.2.4-0.amd64.deb "$APP_DIR/brscan-0.2.4-0.amd64.deb"
+COPY brother-udev-rule-type1-1.0.2-0.all "$APP_DIR/brother-udev-rule-type1-1.0.2-0.all"
+RUN apt install -yq "$APP_DIR/brother-udev-rule-type1-1.0.2-0.all"
+
+
+# p910nd image
+#
+# This image adds the p910nd to the image. This target is not built by
+# default - you will need to specifically target it.
+# ==============================================================================
+FROM scanservjs-brother AS scanservjs-p910nd
+RUN apt-get install -yq p910nd \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+
+ENV \
+  # Path to Device to forward jetdirect
+  # E.g. /dev/bus/usb/001/003
+  JETDIRECT_DEVICE="" \
+
+EXPOSE 9100
