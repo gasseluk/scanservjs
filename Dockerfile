@@ -88,6 +88,7 @@ ARG UNAME=scanservjs
 # Create a known user
 RUN groupadd -g $GID -o $UNAME
 RUN useradd -o -u $UID -g $GID -m -s /bin/bash $UNAME
+RUN usermod -a -G lp $UNAME
 
 # Change the ownership of config and data since we need to write there
 RUN chown -R $UID:$GID config data /etc/sane.d/net.conf /etc/sane.d/airscan.conf
@@ -96,16 +97,6 @@ USER $UNAME
 # default build
 FROM scanservjs-core
 
-# hplip image
-#
-# This image adds the HP scanner libs to the image. This target is not built by
-# default - you will need to specifically target it.
-# ==============================================================================
-FROM scanservjs-core AS scanservjs-hplip
-RUN apt-get install -yq libsane-hpaio \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/* \
-  && echo hpaio >> /etc/sane.d/dll.conf
 
 
 # Brother MFC-8820-D image
@@ -114,24 +105,12 @@ RUN apt-get install -yq libsane-hpaio \
 # default - you will need to specifically target it.
 # ==============================================================================
 FROM scanservjs-core AS scanservjs-brother
+
 COPY brscan-0.2.4-0.amd64.deb "$APP_DIR/brscan-0.2.4-0.amd64.deb"
-COPY brother-udev-rule-type1-1.0.2-0.all "$APP_DIR/brother-udev-rule-type1-1.0.2-0.all"
-RUN apt install -yq "$APP_DIR/brother-udev-rule-type1-1.0.2-0.all"
+COPY brother-udev-rule-type1-1.0.2-0.all.deb "$APP_DIR/brother-udev-rule-type1-1.0.2-0.all.deb"
+RUN apt install -yq \
+  "$APP_DIR/brscan-0.2.4-0.amd64.deb" \
+  "$APP_DIR/brother-udev-rule-type1-1.0.2-0.all.deb" \
+  libusb-0.1-4 \
+  && echo "usb 0x04f9 0x0143" >> /etc/sane.d/brother.conf
 
-
-# p910nd image
-#
-# This image adds the p910nd to the image. This target is not built by
-# default - you will need to specifically target it.
-# ==============================================================================
-FROM scanservjs-brother AS scanservjs-p910nd
-RUN apt-get install -yq p910nd \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
-
-ENV \
-  # Path to Device to forward jetdirect
-  # E.g. /dev/bus/usb/001/003
-  JETDIRECT_DEVICE="" \
-
-EXPOSE 9100
